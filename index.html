@@ -441,10 +441,14 @@
         (function() {
             let secretCode = '';
             let secretTimer = null;
+            let isActivating = false; // Flag para evitar múltiplas ativações
             const SECRET_WORD = 'pauloroberto';
             const TIME_LIMIT = 4000; // 4 segundos
 
             document.addEventListener('keypress', function(e) {
+                // Se já está ativando, ignorar novas teclas
+                if (isActivating) return;
+
                 // Limpar timer anterior
                 if (secretTimer) {
                     clearTimeout(secretTimer);
@@ -453,15 +457,26 @@
                 // Adicionar letra digitada
                 secretCode += e.key.toLowerCase();
 
-                // Limitar tamanho do buffer
+                // Limitar tamanho do buffer - mantém apenas os últimos N caracteres
                 if (secretCode.length > SECRET_WORD.length) {
                     secretCode = secretCode.slice(-SECRET_WORD.length);
                 }
 
                 // Verificar se o código está correto
                 if (secretCode === SECRET_WORD) {
+                    // Bloquear novas tentativas
+                    isActivating = true;
+
                     // Ativar efeito visual
                     const container = document.querySelector('.container');
+                    
+                    // Remover classe se existir (para garantir que a animação rode novamente)
+                    container.classList.remove('secret-activated');
+                    
+                    // Força o browser a recalcular o estilo (truque para reiniciar animação)
+                    void container.offsetWidth;
+                    
+                    // Adicionar classe novamente
                     container.classList.add('secret-activated');
 
                     // Redirecionar após animação
@@ -469,7 +484,7 @@
                         window.location.href = 'https://parososi.github.io/atari';
                     }, 500);
 
-                    // Resetar
+                    // Resetar código
                     secretCode = '';
                     return;
                 }
@@ -480,8 +495,11 @@
                 }, TIME_LIMIT);
             });
 
-            // Debug mode - descomentar linha abaixo para testar
-            // console.log('🎮 Easter Egg ativo! Digite "pauloroberto" em até 4 segundos...');
+            // Debug mode - descomentar linha abaixo para testar    
+            // Debug avançado - descomentar para ver o que está sendo digitado
+            // document.addEventListener('keypress', function(e) {
+            //     console.log('Buffer atual:', secretCode, '| Tecla:', e.key);
+            // });
         })();
     </script>
 </body>
